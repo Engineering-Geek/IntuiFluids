@@ -1,0 +1,19 @@
+ScreenManager:
+    HomeScreen:
+    SimulationScreen:
+
+<HomeScreen>:
+    name: 'HomeScreen'
+    MDTopAppBar:
+        title: 'Home'
+        # only has the home button
+        left_action_items: [["home", lambda x: None, "Home", "Home"]]
+    HomeStackLayout:
+        cols: 5
+
+<SimulationScreen>:
+    name: 'SimulationScreen'
+    MDTopAppBar:
+        title: 'Home'
+        # only has the home button
+        left_action_items: [["home", lambda x: app.go_home(x), "Home", "Home"]]
