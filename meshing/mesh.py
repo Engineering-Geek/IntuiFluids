@@ -1,9 +1,10 @@
 import numpy as np
-from typing import Dict, Callable, Tuple, Union, List
+from typing import Any, Dict, Callable, Tuple, Union, List
 from tqdm.auto import tqdm
 from shapely.geometry import Point, LineString, Polygon, MultiPolygon, MultiPoint, Point
 from scipy.spatial import Delaunay
 from abc import ABC, abstractmethod
+from matplotlib import pyplot as plt
 
 
 class Coordinate:
@@ -155,7 +156,7 @@ class Mesh:
     """
     def __init__(self, boundaries: Dict[BoundarySurface], verbose: bool = False, initial_phi_values: Dict[str, float] = None):        
         self.verbose = verbose
-        self._nodes = self._generate_nodes(boundaries, verbose, initial_phi_values)
+        self._nodes: List[Node] = self._generate_nodes(boundaries, verbose, initial_phi_values)
             
     def _generate_nodes(self, boundaries, initial_phi_values) -> List[Node]:
         """
@@ -236,8 +237,38 @@ class Mesh:
         pass
     
     @abstractmethod
-    def generate_matrices(self):
+    def generate_matrices(self) -> Tuple[np.ndarray[(Any, Any)], np.ndarray]:
         pass
+    
+    def visualize(self, phi: str, save_path: str = None):
+        # if the mesh is 2d, then plot the phi values on a contour plot
+        if all([node.z == 0 for node in self._nodes]):
+            x = np.unique([node.x for node in self._nodes])
+            y = np.unique([node.y for node in self._nodes])
+            z = np.zeros((len(x), len(y)))
+            for node in self._nodes:
+                i = np.where(x == node.x)[0][0]
+                j = np.where(y == node.y)[0][0]
+                z[i, j] = node.phi[phi]
+            plt.contourf(x, y, z)
+            plt.colorbar()
+            plt.title(f"{phi} values")
+            if save_path is not None:
+                plt.savefig(save_path)
+            plt.show()
+        else:
+            # if the mesh is 3d, then plot the phi values on a 3d scatter plot
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            x = [node.x for node in self._nodes]
+            y = [node.y for node in self._nodes]
+            z = [node.z for node in self._nodes]
+            c = [node.phi[phi] for node in self._nodes]
+            ax.scatter(x, y, z, c=c)
+            ax.set_title(f"{phi} values")
+            if save_path is not None:
+                plt.savefig(save_path)
+            plt.show()
     
     def __str__(self):
         return f"Mesh: {len(self._nodes)} nodes"
@@ -249,10 +280,42 @@ class Mesh:
         return self._nodes[index]
     
     @property
-    def nodes(self):
+    def nodes(self) -> List[Node]:
         return self._nodes
         
+    @property
+    def phi_names(self) -> List[str]:
+        return [phi for phi in self._nodes[0].phi_values.keys()]
 
-
+class FiniteVolumeMesh(Mesh):
+    def __init__(self, boundaries: Dict[str, Boundary], initial_phi_values: Dict[str, float], verbose: bool = False):
+        super().__init__(boundaries, initial_phi_values, verbose)
+        self._A, self._b = self._generate_matrices()
+    
+    def _generate_matrices(self) -> Tuple[np.ndarray[(Any, Any)], np.ndarray]:
+        # generate the A matrix
+        A = np.zeros((len(self._nodes), len(self._nodes)))
+        for i, node in enumerate(self._nodes):
+            if node.node_type == "Interior":
+                A[i, i] = -sum([node.get_face_area(neighbor) for neighbor in node.neighbors])
+                for neighbor in node.neighbors:
+                    A[i, neighbor.node_id] = node.get_face_area(neighbor)
+        
+        # generate the b matrix
+        b = np.zeros((len(self._nodes), 1))
+        for i, node in enumerate(self._nodes):
+            b[i] = sum([node.get_face_area(neighbor) * neighbor.phi_values["phi"] for neighbor in node.neighbors])
+        
+        return A, b
+    
+    def solve(self, max_iterations: int = 1000, tolerance: float = 1e-6, verbose: bool = False) -> np.ndarray:
+        # solve the system of linear equations
+        phi_values = np.linalg.solve(self._A, self._b)
+        
+        # update the phi values of the nodes
+        for i, node in enumerate(self._nodes):
+            node.phi_values = phi_values[i]
+        
+        return phi_values
 
 
