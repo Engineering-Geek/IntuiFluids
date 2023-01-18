@@ -1,0 +1,102 @@
+<PrandtleSimulation>
+    MDBoxLayout:
+        orientation: 'horizontal'
+        MDBoxLayout:
+            SimulationBoxLayout:
+                id: simulation_box
+                orientation: 'vertical'
+                size_hint_x: 0.75
+                canvas:
+                    Color:
+                        rgba: [1.0, 1.0, 1.0, 1.0]
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            
+        MDBoxLayout:
+            canvas:
+                Color:
+                    rgba: [0.5, 0.5, 0.5, 1]
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            orientation: 'vertical'
+            size_hint_x: 0.25
+            MDBoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: 0.8
+                MDBoxLayout:
+                    id: nu_slider
+                    size_hint_x: 1/3
+                    size_hint_y: 1
+                    orientation: 'vertical'
+                    MDBoxLayout:
+                        size_hint_y: 0.2
+                        MDLabel:
+                            text: '\u03BD'
+                            halign: 'center'
+                            valign: 'center'
+                            font_style: 'H6'
+                    MDBoxLayout:
+                        MDSlider:
+                            orientation: 'vertical'
+                            min: 1
+                            max: 10
+                            value: 1
+                            hint: True
+                            on_touch_move: root.update_nu(self.value)
+                            
+                MDBoxLayout:
+                    id: pr_slider
+                    size_hint_x: 1/3
+                    size_hint_y: 1
+                    orientation: 'vertical'
+                    MDBoxLayout:
+                        size_hint_y: 0.2
+                        MDLabel:
+                            text: 'Pr'
+                            halign: 'center'
+                            valign: 'center'
+                            font_style: 'H6'
+                    MDBoxLayout:
+                        MDSlider:
+                            orientation: 'vertical'
+                            min: 0.1
+                            max: 5
+                            value: 0.1
+                            hint: True
+                            on_touch_move: root.update_pr(self.value)
+                MDBoxLayout:
+                    id: u_slider
+                    size_hint_x: 1/3
+                    size_hint_y: 1
+                    orientation: 'vertical'
+                    MDBoxLayout:
+                        size_hint_y: 0.2
+                        MDLabel:
+                            text: 'U'
+                            halign: 'center'
+                            valign: 'center'
+                            font_style: 'H6'
+                    MDBoxLayout:
+                        MDSlider:
+                            orientation: 'vertical'
+                            min: 1
+                            max: 10
+                            value: 1
+                            hint: True
+                            on_touch_move: root.update_u(self.value)
+            MDBoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: 0.2
+                MDLabel:
+                    id: pr
+                    text: 'Pr = '
+                    halign: 'center'
+                    valign: 'center'
+                    font_style: 'H6'
+
+
+
+
+

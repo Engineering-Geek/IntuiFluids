@@ -1,0 +1,58 @@
+<WindowManager>:
+    MainWindow:
+    SecondWindow:
+    ThirdWindow:
+
+
+<SimulationCard>:
+    MDBoxLayout:
+        orientation: "vertical"
+        size_hint: None, None
+        size: "200dp", "200dp"
+        padding: "8dp"
+        spacing: "8dp"
+        MDLabel:
+            text: root.text
+            halign: "center"
+            valign: "center"
+            font_style: "H6"
+            pos_hint: {"center_x": .5, "center_y": .5}
+        Image:
+            source: root.image_path
+            allow_stretch: True
+            size_hint: None, None
+            size: "200dp", "200dp"
+            pos_hint: {"center_x": .5, "center_y": .5}
+
+
+<MainWindow>:
+    name: "main"
+    MDGridLayout:
+        id: simulation_list
+        cols: 10
+        SimulationCard:
+            text: "Simulation 1"
+            image_path: "/home/nmelgiri/Downloads/pr_logo.jpg"
+            on_touch_down: root.manager.current = "second"
+        SimulationCard:
+            text: "Simulation 2"
+            image_path: "/home/nmelgiri/Downloads/pr_logo.jpg"
+            on_touch_down: root.manager.current = "third"
+
+<SecondWindow>:
+    name: "second"
+
+    Button:
+        text: "Go Back"
+        on_release: app.root.current = "main"
+
+
+<ThirdWindow>:
+    name: "third"
+
+    MDLabel:
+        text: "Third Window"
+        halign: "center"
+        valign: "center"
+        font_style: "H6"
+        pos_hint: {"center_x": .5, "center_y": .5}
